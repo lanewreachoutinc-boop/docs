@@ -17,6 +17,7 @@ category:
 contentType: how-tos
 ---
 ## About auto-merge
+<img width="1919" height="646" alt="821" src="https://github.com/user-attachments/assets/099fd120-4027-4bfc-8050-8f9a751308ab" />
 
 Auto-merge merges a pull request automatically after all required reviews and status checks pass. Before you use auto-merge, it must be enabled for the repository. See [AUTOTITLE](/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository).
 
