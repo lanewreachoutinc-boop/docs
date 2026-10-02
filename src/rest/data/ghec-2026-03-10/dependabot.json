@@ -1543,7 +1543,7 @@
         {
           "type": "string",
           "name": "message",
-          "description": "<p>A message to include with the review. Has a maximum character length of 2048.</p>",
+          "description": "<p>A message to include with the review.</p>",
           "isRequired": true
         }
       ],
@@ -7870,6 +7870,10 @@
         {
           "httpStatusCode": "404",
           "description": "<p>Resource not found</p>"
+        },
+        {
+          "httpStatusCode": "410",
+          "description": "<p>Gone</p>"
         }
       ],
       "previews": [],
@@ -9011,6 +9015,10 @@
         {
           "httpStatusCode": "409",
           "description": "<p>Conflict</p>"
+        },
+        {
+          "httpStatusCode": "410",
+          "description": "<p>Gone</p>"
         },
         {
           "httpStatusCode": "422",

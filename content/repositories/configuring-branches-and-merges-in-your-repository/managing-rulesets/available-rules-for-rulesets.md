@@ -96,9 +96,7 @@ With both methods, we use the `verified_signature?` to confirm if a commit has a
 
 {% endif %}
 
-You can always push local commits to the branch if the commits are signed and verified. {% ifversion fpt or ghec %}You can also merge signed and verified commits into the branch using a pull request. However, you cannot squash and merge a pull request into the branch on {% data variables.product.github %} unless you are the author of the pull request.{% else %} However, you cannot merge pull requests into the branch on {% data variables.product.github %}.{% endif %} You can {% ifversion fpt or ghec %}squash and {% endif %}merge pull requests locally. For more information, see [AUTOTITLE](/pull-requests/how-tos/review-pull-requests/checking-out-pull-requests-locally).
-
-{% ifversion fpt or ghec %} For more information about merge methods, see [AUTOTITLE](/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/about-merge-methods-on-github).{% endif %}
+{% data reusables.repositories.required-signed-commits %}
 
 ## Require a pull request before merging
 
@@ -130,6 +128,23 @@ Optionally, you can require all comments on the pull request to be resolved befo
 
 {% ifversion repo-rules-merge-type %}
 Optionally, you can require a merge type of merge, squash, or rebase. This means the targeted branches may only be merged based on the allowed type. Additionally if the repository has disabled a merge method and the ruleset required a different method, the merge will be blocked. See [AUTOTITLE](/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/about-merge-methods-on-github).
+{% endif %}
+
+{% ifversion repo-rules-copilot-extra-approval %}
+
+#### Additional approval for unattributed {% data variables.product.prodname_copilot_short %} pull requests
+
+> [!NOTE]
+> This feature is in {% data variables.release-phases.public_preview %} and subject to change.
+
+**Require an additional approval for unattributed {% data variables.product.prodname_copilot_short %} pull requests** is enabled by default, for both new and existing rulesets. When {% data variables.product.prodname_copilot_short %} opens a pull request that isn't attributed to a person, the ruleset requires one more approval than the number you configured. For example, a ruleset that requires one approval requires two approvals from people with write access.
+
+Requiring one approval usually means two people are involved in a change: the person who wrote it and the person who approved it. That assumption doesn't hold when {% data variables.product.prodname_copilot_short %} opens a pull request under its own app identity instead of on behalf of a person, for example when you prompt it from a shared context such as a group thread or channel. See [AUTOTITLE](/copilot/how-tos/copilot-integrations/integrate-cloud-agent-with-slack) and [AUTOTITLE](/copilot/how-tos/copilot-integrations/integrate-cloud-agent-with-teams).
+
+This setting has no effect if the ruleset requires zero approvals, so repositories that use pull requests as a record of changes rather than to gate on approvals are unaffected.
+
+If you clear this setting, these pull requests require only the number of approvals you configured. If you also require an approval from someone other than the last person to push, at least one approval must cover the last push and come from someone other than {% data variables.product.prodname_copilot_short %}.
+
 {% endif %}
 
 {% ifversion repo-rules-required-reviewer %}
@@ -196,6 +211,24 @@ Enabling force pushes will not override any other rules. For example, if a branc
 
 If a site administrator has blocked force pushes to the default branch only, you can still enable force pushes for any other branch or tag.{% endif %}
 
+{% ifversion secret-scanning-merge-protection %}
+
+## Require {% data variables.product.prodname_secret_scanning %} alerts are resolved
+
+> [!NOTE]
+> {% data reusables.secret-scanning.merge-protection-public-preview %}
+
+If your repositories use {% data variables.product.prodname_secret_scanning %}, you can prevent a pull request from merging when either of these conditions applies:
+
+* A {% data variables.product.prodname_secret_scanning %} scan has not completed for the head commit of the pull request.
+* A commit in the pull request introduced an open {% data variables.product.prodname_secret_scanning %} alert that matches a secret type selected in the ruleset.
+
+You can configure the rule for provider, custom, and generic patterns. AI-detected secrets are not supported.
+
+For more information, see [AUTOTITLE](/code-security/how-tos/secure-your-secrets/prevent-future-leaks/block-merges-with-secrets).
+
+{% endif %}
+
 ## Require {% data variables.product.prodname_code_scanning %} results
 
 If your repositories are configured with {% data variables.product.prodname_code_scanning %}, you can use rulesets to prevent pull requests from being merged when one of the following conditions is met:
@@ -225,8 +258,8 @@ If your repository has {% data variables.product.prodname_code_quality %} enable
 
 This rule blocks a pull request from being merged when either of two code coverage thresholds is not met:
 
-* **Minimum coverage percentage**: the aggregated code coverage for the pull request branch is below the configured percentage.
-* **Maximum coverage drop**: code coverage drops by more than the configured number of percentage points relative to the default branch.
+* **Minimum line coverage percentage**: the aggregated line coverage for the pull request branch is below the configured percentage.
+* **Maximum line coverage drop**: line coverage drops by more than the configured number of percentage points relative to the default branch.
 
 For how to configure the thresholds, the prerequisite for uploading coverage data, and how to roll the rule out safely, see [AUTOTITLE](/code-security/how-tos/maintain-quality-code/restrict-code-coverage).
 
@@ -254,7 +287,7 @@ If a ruleset workflow runs in "Evaluate" mode and passes, you can set the rulese
 
 If you open a pull request before you create the ruleset in "Evaluate" mode, you can still merge the pull request since the ruleset is not enforced.
 
-For more information about enforcement statuses, see [AUTOTITLE](/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository#about-using-enforcement-statuses).
+For more information about enforcement statuses, see [AUTOTITLE](/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository#using-ruleset-enforcement-statuses).
 
 ### Supported event triggers
 
@@ -302,6 +335,14 @@ Prevent commits that include changes in specified file paths from being pushed t
 
 {% data reusables.repositories.rulesets-push-rules-path-example %}
 
+{% ifversion push-rule-allowed-exceptions %}
+
+You can also add allowed exceptions to this rule. A file matching an allowed exception can be pushed even when it also matches a restricted path.
+
+{% data reusables.repositories.rulesets-push-rules-allowed-exceptions %}
+
+{% endif %}
+
 ## Restrict file path length
 
 Prevent commits that include file paths that exceed a specified character limit from being pushed to the repository.
@@ -310,6 +351,20 @@ Prevent commits that include file paths that exceed a specified character limit 
 
 Prevent commits that include files with specified file extensions from being pushed to the repository. {% ifversion available-rules-limit %}Limit is 200 entries and up to 200 characters in each entry.{% endif %}
 
+{% ifversion push-rule-allowed-exceptions %}
+
+If you need to allow an exception for a single file of an otherwise blocked file type, use "Restrict file paths" with a pattern such as `**/*.jar`. Only the "Restrict file paths" and "Restrict file size" rules support allowed exceptions.
+
+{% endif %}
+
 ## Restrict file size
 
 Prevent commits that exceed a specified file size limit from being pushed to the repository.
+
+{% ifversion push-rule-allowed-exceptions %}
+
+You can also add allowed exceptions to this rule. A file matching an allowed exception can exceed the file size limit.
+
+{% data reusables.repositories.rulesets-push-rules-allowed-exceptions %}
+
+{% endif %}
